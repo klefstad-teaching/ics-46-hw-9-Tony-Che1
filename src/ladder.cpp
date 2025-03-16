@@ -12,12 +12,13 @@ void error(string word1, string word2, string msg) {
 }
 
 bool edit_distance_within(const std::string& str1, const std::string& str2, int d) {
-    if (abs(static_cast<int>(str1.length()) - static_cast<int>(str2.length())) > d) {
+    int len_diff = abs(static_cast<int>(str1.length()) - static_cast<int>(str2.length())) 
+    if (len_diff > d) {
         return false;
     }
 
     // If the lengths are the same, check for substitutions
-    if (str1.length() == str2.length()) {
+    if (len_diff == 0) {
         int diff_count = 0;
         for (size_t i = 0; i < str1.length(); ++i) {
             if (str1[i] != str2[i]) {
@@ -31,7 +32,7 @@ bool edit_distance_within(const std::string& str1, const std::string& str2, int 
     }
 
     // If the lengths differ by 1, check for insertions or deletions
-    if (abs(static_cast<int>(str1.length()) - static_cast<int>(str2.length())) == 1) {
+    if (len_diff == 1) {
         string shorter = str1.length() < str2.length() ? str1 : str2;
         string longer = str1.length() > str2.length() ? str1 : str2;
 
@@ -72,14 +73,13 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
             ladders.pop();
             string last_word = current_ladder.back();
 
-            if (last_word == end_word) {
-                return current_ladder;
-            }
-
             for (const string& word : word_list) {
                 if (visited.find(word) == visited.end() && is_adjacent(last_word, word)) {
                     vector<string> new_ladder = current_ladder;
                     new_ladder.push_back(word);
+                    if (work == end_word){
+                        return new_ladder;
+                    }
                     ladders.push(new_ladder);
                     visited.insert(word);
                 }
