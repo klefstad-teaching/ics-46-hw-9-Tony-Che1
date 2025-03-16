@@ -1,4 +1,11 @@
 #include "ladder.h"
+#include <string>
+#include <cmath>
+#include <fstream>
+#include <iostream>
+#include <set>
+#include <cerrno>
+#include <cstring>
 
 void error(string word1, string word2, string msg) {
     cerr << "Error: " << msg << " (" << word1 << ", " << word2 << ")" << endl;
@@ -9,16 +16,34 @@ bool edit_distance_within(const std::string& str1, const std::string& str2, int 
         return false;
     }
 
-    int diff_count = 0;
-    for (size_t i = 0; i < str1.length() && i < str2.length(); ++i) {
-        if (str1[i] != str2[i]) {
-            diff_count++;
-            if (diff_count > d) {
-                return false;
+    // If the lengths are the same, check for substitutions
+    if (str1.length() == str2.length()) {
+        int diff_count = 0;
+        for (size_t i = 0; i < str1.length(); ++i) {
+            if (str1[i] != str2[i]) {
+                diff_count++;
+                if (diff_count > d) {
+                    return false;
+                }
             }
         }
+        return diff_count <= d;
     }
-    return diff_count <= d;
+
+    // If the lengths differ by 1, check for insertions or deletions
+    if (abs(static_cast<int>(str1.length()) - static_cast<int>(str2.length())) == 1) {
+        string shorter = str1.length() < str2.length() ? str1 : str2;
+        string longer = str1.length() > str2.length() ? str1 : str2;
+
+        for (size_t i = 0; i < shorter.length(); ++i) {
+            if (shorter[i] != longer[i]) {
+                // Skip one character from the longer word
+                return shorter.substr(i) == longer.substr(i + 1);
+            }
+        }
+        return true; // If all characters match, it's a valid insertion or deletion
+    }
+    return false;
 }
 
 bool is_adjacent(const string& word1, const string& word2) {
@@ -28,6 +53,10 @@ bool is_adjacent(const string& word1, const string& word2) {
 vector<string> generate_word_ladder(const string& begin_word, const string& end_word, const set<string>& word_list) {
     if (word_list.find(end_word) == word_list.end()) {
         return {};
+    }
+
+    if (begin_word == end_word) {
+        return {begin_word}; // No ladder needed, return the word itself
     }
 
     queue<vector<string>> ladders;
@@ -62,21 +91,23 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
 }
 
 void load_words(set<string>& word_list, const string& file_name) {
-    ifstream file(file_name);
-    if (!file) {
-        cerr << "Error opening file: " << file_name << endl;
+    std::ifstream in(file_name);
+    if (!in.is_open()) {
+        // Print the error using strerror(errno) to give a more specific system error message
+        std::cerr << "Error: unable to open file " << file_name << " (" << strerror(errno) << ")" << std::endl;
         return;
     }
 
-    string word;
-    while (file >> word) {
-        for(auto &ch : word){
+    string w;
+    while(in >> w)
+    {
+        for(auto &ch : w)
+        {
             ch = tolower(ch);
         }
-        word_list.insert(word);
+        word_list.insert(w);
     }
-
-    file.close();
+    in.close();
 }
 
 void print_word_ladder(const vector<string>& ladder) {
@@ -94,7 +125,7 @@ void print_word_ladder(const vector<string>& ladder) {
 
 void verify_word_ladder(){
     set<string> word_list;
-    load_words(word_list, "words.txt");
+    load_words(word_list, "src/words.txt");
 
     auto ladder1 = generate_word_ladder("cat", "dog", word_list);
     cout << "car -> dog ladder size: " << ladder1.size() << endl;
