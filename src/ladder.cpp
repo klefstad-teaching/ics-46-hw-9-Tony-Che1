@@ -77,7 +77,7 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
                 if (visited.find(word) == visited.end() && is_adjacent(last_word, word)) {
                     vector<string> new_ladder = current_ladder;
                     new_ladder.push_back(word);
-                    if (work == end_word){
+                    if (word == end_word){
                         return new_ladder;
                     }
                     ladders.push(new_ladder);
