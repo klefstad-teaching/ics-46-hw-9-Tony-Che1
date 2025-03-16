@@ -6,10 +6,6 @@
 #include <set>
 #include <cerrno>
 #include <cstring>
-#include <unordered_map>
-
-// A map to store precomputed adjacent words for each word
-unordered_map<string, vector<string>> adjacent_words_map;
 
 void error(string word1, string word2, string msg) {
     cerr << "Error: " << msg << " (" << word1 << ", " << word2 << ")" << endl;
@@ -70,27 +66,21 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
     visited.insert(begin_word);
 
     while (!ladders.empty()) {
-        int size = ladders.size();
-
-        for (int i = 0; i < size; ++i) {
-            vector<string> current_ladder = ladders.front();
-            ladders.pop();
-            string last_word = current_ladder.back();
-
-            for (const string& word : adjacent_words_map[last_word]) {
-                if (visited.find(word) == visited.end()) {
-                    vector<string> new_ladder = current_ladder;
-                    new_ladder.push_back(word);
-                    if (word == end_word){
-                        return new_ladder;
-                    }
-                    ladders.push(new_ladder);
-                    visited.insert(word);
+        vector<string> current_ladder = ladders.front();
+        ladders.pop();
+        string last_word = current_ladder.back();
+        for (const string& word : word_list) {
+            if (visited.find(word) == visited.end() && is_adjacent(last_word, word)) {
+                vector<string> new_ladder = current_ladder;
+                new_ladder.push_back(word);
+                if (word == end_word){
+                    return new_ladder;
                 }
+                ladders.push(new_ladder);
+                visited.insert(word);
             }
         }
     }
-
     return {};
 }
 
@@ -112,17 +102,6 @@ void load_words(set<string>& word_list, const string& file_name) {
         word_list.insert(w);
     }
     in.close();
-
-    // Precompute adjacent words for each word in the list
-    for (const auto& word : word_list) {
-        vector<string> adj_words;
-        for (const auto& candidate : word_list) {
-            if (is_adjacent(word, candidate)) {
-                adj_words.push_back(candidate);
-            }
-        }
-        adjacent_words_map[word] = adj_words;
-    }
 }
 
 void print_word_ladder(const vector<string>& ladder) {
