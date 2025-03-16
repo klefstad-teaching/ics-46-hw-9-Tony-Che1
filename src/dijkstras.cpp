@@ -6,13 +6,13 @@ vector<int> dijkstra_shortest_path(const Graph& G, int source, vector<int>& prev
     vector<int> distances(numVertices, INF);
     vector<bool> visited(numVertices, false);
     distances[source] = 0;
-    previous.assign(G.numVertices, -1);
+    previous.assign(numVertices, -1);
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> minheap;
 
-    minheap.push({source, 0});
+    minheap.push({0, source});
 
     while (!minheap.empty()){
-        int u = minheap.top().first;
+        auto [curr_dist, u] = minheap.top();
         minheap.pop();
 
         if (visited[u]) continue;
@@ -20,10 +20,10 @@ vector<int> dijkstra_shortest_path(const Graph& G, int source, vector<int>& prev
         for (auto & edge : G[u]) {
             int v = edge.dst;
             int weight = edge.weight;
-            if (!visited[v] && distances[u] + weight < distances[v]) {
-                distances[v] = distances[u] + weight;
+            if (!visited[v] && curr_dist + weight < distances[v]) {
+                distances[v] = curr_dist + weight;
                 previous[v] = u; 
-                minheap.push({v, distances[v]});
+                minheap.push({distances[v], v});
             }
         }
     }
