@@ -12,13 +12,12 @@ vector<int> dijkstra_shortest_path(const Graph& G, int source, vector<int>& prev
     minheap.push({source, 0});
 
     while (!minheap.empty()){
-        int u = minheap.top().second;
-        int dist_u = minheap.top().first;
+        int u = minheap.top().first;
         minheap.pop();
 
         if (visited[u]) continue;
         visited[u] = true;
-        for (Edge& edge : G[u]) {
+        for (auto & edge : G[u]) {
             int v = edge.dst;
             int weight = edge.weight;
             if (!visited[v] && distances[u] + weight < distances[v]) {

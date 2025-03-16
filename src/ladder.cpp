@@ -56,7 +56,7 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
     }
 
     if (begin_word == end_word) {
-        return {begin_word}; // No ladder needed, return the word itself
+        return {}; // No ladder needed, return the word itself
     }
 
     queue<vector<string>> ladders;
@@ -116,6 +116,7 @@ void print_word_ladder(const vector<string>& ladder) {
         return;
     }
 
+    cout<< "Word ladder found: ";
     for(const auto& word : ladder){
         cout << word << " ";
     }
