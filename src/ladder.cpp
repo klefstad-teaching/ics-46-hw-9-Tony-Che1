@@ -6,6 +6,9 @@
 #include <set>
 #include <cerrno>
 #include <cstring>
+#include <unordered_map>
+
+unordered_map<string, set<string>> adjacent_word_cache;
 
 void error(string word1, string word2, string msg) {
     cerr << "Error: " << msg << " (" << word1 << ", " << word2 << ")" << endl;
@@ -69,8 +72,24 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
         vector<string> current_ladder = ladders.front();
         ladders.pop();
         string last_word = current_ladder.back();
-        for (const string& word : word_list) {
-            if (visited.find(word) == visited.end() && is_adjacent(last_word, word)) {
+
+        set<string> adjacent_words;
+
+        if (adjacent_word_cache.find(last_word) != adjacent_word_cache.end()) {
+            adjacent_words = adjacent_word_cache[last_word];
+        } else {
+            // If not cached, compute adjacent words
+            for (const string& word : word_list) {
+                if (is_adjacent(last_word, word)) {
+                    adjacent_words.insert(word);
+                }
+            }
+            // Cache the adjacent words for future reference
+            adjacent_word_cache[last_word] = adjacent_words;
+        }
+
+        for (const string& word : adjacent_words) {
+            if (visited.find(word) == visited.end()) {
                 vector<string> new_ladder = current_ladder;
                 new_ladder.push_back(word);
                 if (word == end_word){
